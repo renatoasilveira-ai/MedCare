@@ -90,6 +90,8 @@ INSERT INTO exames_consulta (consulta_id, nome_exame, valor_exame) VALUES
 (2, 'Hemograma Completo', 45.00),
 (3, 'Exame de Urina', 30.00);
 
+create view valores_consultas as
+
 SELECT 
     m.nome AS medico,
     m.crm,
@@ -98,6 +100,8 @@ SELECT
 FROM medicos m
 INNER JOIN especialidades e ON m.especialidade_id = e.id
 ORDER BY m.valor_consulta DESC;
+
+create VIEW consultas_de_carlos as
 
 SELECT 
     c.id AS consulta_id,
@@ -112,6 +116,8 @@ INNER JOIN especialidades e ON m.especialidade_id = e.id
 WHERE p.nome = 'Carlos Silva'
 ORDER BY c.data_hora ASC;
 
+create view valor_total_atendimento as
+
 select 
 	c.id as consulta_id,
 	p.nome as pacientes,
@@ -125,3 +131,24 @@ inner join medicos m on c.medico_id = m.id
 LEFT join exames_consulta ex on ex.consulta_id = c.id
 GROUP by c.id,p.nome,m.nome,m.valor_consulta
 order by c.id;
+
+create view valor_maior_trezentos as
+SELECT 
+    m.nome AS medico,
+    m.crm,
+    e.nome AS especialidade,
+    m.valor_consulta
+FROM medicos m
+INNER JOIN especialidades e ON m.especialidade_id = e.id
+WHERE m.valor_consulta > 300.00;
+
+create view faturamento_consultas as
+SELECT 
+    e.nome AS especialidade,
+    COUNT(c.id) AS quantidade_consultas,
+    COALESCE(SUM(m.valor_consulta), 0.00) AS faturamento_consultas
+FROM especialidades e
+INNER JOIN medicos m ON e.id = m.especialidade_id
+LEFT JOIN consultas c ON m.id = c.medico_id AND c.status = 'Realizada'
+GROUP BY e.id, e.nome
+ORDER BY faturamento_consultas DESC;
